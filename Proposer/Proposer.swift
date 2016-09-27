@@ -17,9 +17,7 @@ import CoreLocation
 public enum PrivateResource {
     case photos
     case camera
-    case microphone
     case contacts
-    case reminders
     case calendar
 
     public enum LocationUsage {
@@ -34,12 +32,8 @@ public enum PrivateResource {
             return PHPhotoLibrary.authorizationStatus() == .notDetermined
         case .camera:
             return AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeVideo) == .notDetermined
-        case .microphone:
-            return AVAudioSession.sharedInstance().recordPermission() == .undetermined
         case .contacts:
             return ABAddressBookGetAuthorizationStatus() == .notDetermined
-        case .reminders:
-            return EKEventStore.authorizationStatus(for: .reminder) == .notDetermined
         case .calendar:
             return EKEventStore.authorizationStatus(for: .event) == .notDetermined
         case .location:
@@ -53,12 +47,8 @@ public enum PrivateResource {
             return PHPhotoLibrary.authorizationStatus() == .authorized
         case .camera:
             return AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeVideo) == .authorized
-        case .microphone:
-            return AVAudioSession.sharedInstance().recordPermission() == .granted
         case .contacts:
             return ABAddressBookGetAuthorizationStatus() == .authorized
-        case .reminders:
-            return EKEventStore.authorizationStatus(for: .reminder) == .authorized
         case .calendar:
             return EKEventStore.authorizationStatus(for: .event) == .authorized
         case .location(let usage):
@@ -86,14 +76,8 @@ public func proposeToAccess(_ resource: PrivateResource, agreed successAction: @
     case .camera:
         proposeToAccessCamera(agreed: successAction, rejected: failureAction)
 
-    case .microphone:
-        proposeToAccessMicrophone(agreed: successAction, rejected: failureAction)
-
     case .contacts:
         proposeToAccessContacts(agreed: successAction, rejected: failureAction)
-
-    case .reminders:
-        proposeToAccessEventForEntityType(.reminder, agreed: successAction, rejected: failureAction)
 
     case .calendar:
         proposeToAccessEventForEntityType(.event, agreed: successAction, rejected: failureAction)
@@ -118,14 +102,6 @@ private func proposeToAccessPhotos(agreed successAction: @escaping ProposerActio
 
 private func proposeToAccessCamera(agreed successAction: @escaping ProposerAction, rejected failureAction: @escaping ProposerAction) {
     AVCaptureDevice.requestAccess(forMediaType: AVMediaTypeVideo) { granted in
-        DispatchQueue.main.async {
-            granted ? successAction() : failureAction()
-        }
-    }
-}
-
-private func proposeToAccessMicrophone(agreed successAction: @escaping ProposerAction, rejected failureAction: @escaping ProposerAction) {
-    AVAudioSession.sharedInstance().requestRecordPermission { granted in
         DispatchQueue.main.async {
             granted ? successAction() : failureAction()
         }

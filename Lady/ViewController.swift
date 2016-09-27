@@ -49,18 +49,6 @@ class ViewController: UIViewController {
         })
     }
 
-    @IBAction func recordAudio() {
-
-        let microphone: PrivateResource = .microphone
-
-        proposeToAccess(microphone, agreed: {
-            print("I can access Microphone. :]\n")
-
-        }, rejected: {
-            self.alertNoPermissionToAccess(microphone)
-        })
-    }
-
     @IBAction func readContacts() {
 
         let contacts: PrivateResource = .contacts
@@ -87,18 +75,6 @@ class ViewController: UIViewController {
             
         }, rejected: {
             self.alertNoPermissionToAccess(location)
-        })
-    }
-
-    @IBAction func addReminder() {
-
-        let reminders: PrivateResource = .reminders
-
-        proposeToAccess(reminders, agreed: { 
-            print("I can access Reminders. :]\n")
-
-        }, rejected: {
-            self.alertNoPermissionToAccess(reminders)
         })
     }
 
