@@ -10,14 +10,12 @@ import Foundation
 import AVFoundation
 import Photos
 import AddressBook
-import Contacts
 import EventKit
 import CoreLocation
 
 public enum PrivateResource {
     case photos
     case camera
-    case contacts
     case calendar
 
     public enum LocationUsage {
@@ -32,8 +30,6 @@ public enum PrivateResource {
             return PHPhotoLibrary.authorizationStatus() == .notDetermined
         case .camera:
             return AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeVideo) == .notDetermined
-        case .contacts:
-            return ABAddressBookGetAuthorizationStatus() == .notDetermined
         case .calendar:
             return EKEventStore.authorizationStatus(for: .event) == .notDetermined
         case .location:
@@ -47,8 +43,6 @@ public enum PrivateResource {
             return PHPhotoLibrary.authorizationStatus() == .authorized
         case .camera:
             return AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeVideo) == .authorized
-        case .contacts:
-            return ABAddressBookGetAuthorizationStatus() == .authorized
         case .calendar:
             return EKEventStore.authorizationStatus(for: .event) == .authorized
         case .location(let usage):
@@ -76,9 +70,6 @@ public func proposeToAccess(_ resource: PrivateResource, agreed successAction: @
     case .camera:
         proposeToAccessCamera(agreed: successAction, rejected: failureAction)
 
-    case .contacts:
-        proposeToAccessContacts(agreed: successAction, rejected: failureAction)
-
     case .calendar:
         proposeToAccessEventForEntityType(.event, agreed: successAction, rejected: failureAction)
 
@@ -104,54 +95,6 @@ private func proposeToAccessCamera(agreed successAction: @escaping ProposerActio
     AVCaptureDevice.requestAccess(forMediaType: AVMediaTypeVideo) { granted in
         DispatchQueue.main.async {
             granted ? successAction() : failureAction()
-        }
-    }
-}
-
-private func proposeToAccessContacts(agreed successAction: @escaping ProposerAction, rejected failureAction: @escaping ProposerAction) {
-
-    if #available(iOS 9.0, *) {
-        switch CNContactStore.authorizationStatus(for: .contacts) {
-            
-        case .authorized:
-            successAction()
-            
-        case .notDetermined:
-            CNContactStore().requestAccess(for: .contacts) { granted, error in
-                DispatchQueue.main.async {
-                    if granted {
-                        successAction()
-                    } else {
-                        failureAction()
-                    }
-                }
-            }
-            
-        default:
-            failureAction()
-        }
-
-    } else {
-        switch ABAddressBookGetAuthorizationStatus() {
-
-        case .authorized:
-            successAction()
-
-        case .notDetermined:
-            if let addressBook: ABAddressBook = ABAddressBookCreateWithOptions(nil, nil)?.takeRetainedValue() {
-                ABAddressBookRequestAccessWithCompletion(addressBook) { granted, error in
-                    DispatchQueue.main.async {
-                        if granted {
-                            successAction()
-                        } else {
-                            failureAction()
-                        }
-                    }
-                }
-            }
-            
-        default:
-            failureAction()
         }
     }
 }

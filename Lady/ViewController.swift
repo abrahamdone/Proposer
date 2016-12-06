@@ -49,23 +49,6 @@ class ViewController: UIViewController {
         })
     }
 
-    @IBAction func readContacts() {
-
-        let contacts: PrivateResource = .contacts
-
-        let propose: Propose = {
-
-            proposeToAccess(contacts, agreed: {
-                print("I can access Contacts. :]\n")
-
-            }, rejected: {
-                self.alertNoPermissionToAccess(contacts)
-            })
-        }
-
-        showProposeMessageIfNeedFor(contacts, andTryPropose: propose)
-    }
-
     @IBAction func shareLocation() {
 
         let location: PrivateResource = .location(.whenInUse)
